@@ -52,9 +52,7 @@ export function useDialog<P = any>(
   }
 
   function closeDialog(val?: any) {
-    // console.log(46, val)
     if (dialogInstance) dialogInstance.props.modelValue = false
-    // return val
     if (onCloseCallback) {
       onCloseCallback(val)
     }
@@ -72,7 +70,6 @@ export function useDialog<P = any>(
     if (modifyOptions) merge(_options, modifyOptions)
     // 定义当前块关闭前钩子变量
     let onBeforeClose: (() => Promise<boolean | void> | boolean | void) | null
-    console.log(60, options)
     const optionsValue = unref(options) // 使用unref确保无论是ref还是普通对象都能正确处理
     const { dialogProps = {}, contentProps = {} } = optionsValue || {}
     // 调用before钩子，如果为false则不打开
@@ -88,10 +85,8 @@ export function useDialog<P = any>(
         ...dialogProps,
         modelValue: true,
         beforeClose: async (done) => {
-          console.log(76)
           // 配置`el-dialog`的关闭回调钩子函数
           const result = await onBeforeClose?.()
-          console.log(78, result, done)
           if (result === false) {
             return
           }
@@ -99,7 +94,6 @@ export function useDialog<P = any>(
           // onClosed()
         },
         onClosed: () => {
-          console.log(86, dialogProps)
           dialogProps?.onClosed?.()
           closeAfter()
           // 关闭后回收当前变量

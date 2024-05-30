@@ -110,13 +110,6 @@ const resetSearch = () => {
   handleSearch()
 }
 
-const getMenu = () => {
-  console.log(114)
-  menuApi().then((res) => {
-    console.log(115, res)
-  })
-}
-getMenu()
 const handleDialogClose = (data: any) => {
   console.log("Dialog closed with data:", data?.aaa)
 }
@@ -155,11 +148,9 @@ const { openDialog: openDialog2 } = useDialog(
 
 const showCustomDialog = async () => {
   const val = openDialog1()
-  console.log(130, val)
 }
 const showCustomDialog2 = async () => {
   const val = openDialog2()
-  console.log(130, val)
 }
 
 //#endregion
