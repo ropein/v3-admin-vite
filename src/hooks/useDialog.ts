@@ -1,4 +1,4 @@
-import { getCurrentInstance, Ref } from "vue"
+import { getCurrentInstance, Ref, unref } from "vue"
 import { h, isRef, onUnmounted, render } from "vue"
 import { ElDialog } from "element-plus"
 import type { ComponentInternalInstance } from "vue"
@@ -12,21 +12,25 @@ type ElDialogInstance = InstanceType<typeof ElDialog>
 type DialogProps = ElDialogInstance["$props"] & {
   onBeforeOpen?: () => boolean | void
 }
+
 interface ElDialogSlots {
   header?: (...args: any[]) => Content
   footer?: (...args: any[]) => Content
 }
+
 interface Options<P> {
   dialogProps?: DialogProps
   dialogSlots?: ElDialogSlots
   contentProps?: P
   closeEventName?: string // 新增的属性
 }
+
 // 定义工具函数，获取计算属性的option
 function getOptions<P>(options?: Ref<Options<P>> | Options<P>) {
   if (!options) return {}
   return isRef(options) ? options.value : options
 }
+
 export function useDialog<P = any>(
   content: Content,
   options?: Ref<Options<P>> | Options<P>,
@@ -46,6 +50,7 @@ export function useDialog<P = any>(
     }
     dialogInstance = null
   }
+
   function closeDialog(val?: any) {
     // console.log(46, val)
     if (dialogInstance) dialogInstance.props.modelValue = false
@@ -68,7 +73,8 @@ export function useDialog<P = any>(
     // 定义当前块关闭前钩子变量
     let onBeforeClose: (() => Promise<boolean | void> | boolean | void) | null
     console.log(60, options)
-    const { dialogProps, contentProps } = options
+    const optionsValue = unref(options) // 使用unref确保无论是ref还是普通对象都能正确处理
+    const { dialogProps = {}, contentProps = {} } = optionsValue || {}
     // 调用before钩子，如果为false则不打开
     if (dialogProps?.onBeforeOpen?.() === false) {
       return

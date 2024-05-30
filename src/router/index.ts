@@ -183,7 +183,6 @@ const staticRoutes = [
   }
 ]
 const dynamicRoutesFromInterface = await getMenu()
-console.log(185, dynamicRoutesFromInterface)
 // console.log(155, dynamicRoutesFromInterface[0])
 const getRoutes = () => {
   const firstRedirectRoute = {
