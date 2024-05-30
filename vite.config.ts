@@ -39,6 +39,14 @@ export default ({ mode }: ConfigEnv): UserConfigExport => {
           ws: true,
           /** 是否允许跨域 */
           changeOrigin: true
+        },
+        // 我自己的
+        "/api/v2": {
+          target: "https://mock.mengxuegu.com/mock/6656d83ab462b81cb3916b99",
+          ws: true,
+          /** 是否允许跨域 */
+          changeOrigin: true,
+          rewrite: (path) => path.replace("/api/v2", "")
         }
       },
       /** 预热常用文件，提高初始页面加载速度 */

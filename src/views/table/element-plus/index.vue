@@ -1,11 +1,15 @@
 <script lang="ts" setup>
 import { reactive, ref, watch } from "vue"
 import { createTableDataApi, deleteTableDataApi, updateTableDataApi, getTableDataApi } from "@/api/table"
+import { menuApi } from "@/api/menu"
 import { type CreateOrUpdateTableRequestData, type GetTableData } from "@/api/table/types/table"
 import { type FormInstance, type FormRules, ElMessage, ElMessageBox } from "element-plus"
 import { Search, Refresh, CirclePlus, Delete, Download, RefreshRight } from "@element-plus/icons-vue"
 import { usePagination } from "@/hooks/usePagination"
 import { cloneDeep } from "lodash-es"
+
+import CustomDialogContent from "./CustomDialogContent.vue"
+import { useDialog } from "@/hooks/useDialog"
 
 defineOptions({
   // 命名当前组件
@@ -105,6 +109,59 @@ const resetSearch = () => {
   searchFormRef.value?.resetFields()
   handleSearch()
 }
+
+const getMenu = () => {
+  console.log(114)
+  menuApi().then((res) => {
+    console.log(115, res)
+  })
+}
+getMenu()
+const handleDialogClose = (data: any) => {
+  console.log("Dialog closed with data:", data?.aaa)
+}
+// const componentInstance = h(DialogFooter, { prop: "value" })
+
+const { openDialog: openDialog1 } = useDialog(
+  CustomDialogContent,
+  {
+    dialogProps: {
+      title: "购买22"
+    },
+    contentProps: {
+      from: "function"
+    }
+    // dialogSlots: {
+    //   footer: componentInstance
+    // }
+  },
+  handleDialogClose
+)
+const { openDialog: openDialog2 } = useDialog(
+  CustomDialogContent,
+  {
+    dialogProps: {
+      title: "购买2222"
+    },
+    contentProps: {
+      from: "function"
+    }
+    // dialogSlots: {
+    //   footer: componentInstance
+    // }
+  },
+  handleDialogClose
+)
+
+const showCustomDialog = async () => {
+  const val = openDialog1()
+  console.log(130, val)
+}
+const showCustomDialog2 = async () => {
+  const val = openDialog2()
+  console.log(130, val)
+}
+
 //#endregion
 
 /** 监听分页参数的变化 */
@@ -130,6 +187,8 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], getTabl
     <el-card v-loading="loading" shadow="never">
       <div class="toolbar-wrapper">
         <div>
+          <el-button @click="showCustomDialog">测试全局弹窗</el-button>
+          <el-button @click="showCustomDialog2">测试全局弹窗</el-button>
           <el-button type="primary" :icon="CirclePlus" @click="dialogVisible = true">新增用户</el-button>
           <el-button type="danger" :icon="Delete">批量删除</el-button>
         </div>
@@ -208,6 +267,7 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], getTabl
 <style lang="scss" scoped>
 .search-wrapper {
   margin-bottom: 20px;
+
   :deep(.el-card__body) {
     padding-bottom: 2px;
   }
