@@ -1,4 +1,4 @@
-import { type RouteRecordRaw, createRouter } from "vue-router"
+import { type RouteRecordRaw, createRouter, BaseRouteConfig, RouteWithDefault } from "vue-router"
 import { history, flatMultiLevelRoutes } from "./helper"
 import routeSettings from "@/config/route"
 // import { menuApi } from "@/api/menu"
@@ -9,8 +9,8 @@ let dongtaiMenu = []
 const getMenu = async () => {
   // const res = await menuApi({})
   // menuApi({}).then((res) => {
-  const routeFiles = import.meta.glob("../router/main/**/*.ts", { eager: true })
-  const routes = []
+  const routeFiles = import.meta.glob("../router/main/**/*.ts", { eager: true }) as Record<string, RouteWithDefault>
+  const routes: BaseRouteConfig[] = []
   for (const path in routeFiles) {
     if (Object.prototype.hasOwnProperty.call(routeFiles, path)) {
       const routeConfig = routeFiles[path].default // 或者根据实际情况调整导出名
@@ -18,27 +18,27 @@ const getMenu = async () => {
     }
   }
   dongtaiMenu = [
-    // {
-    //   name: "表格",
-    //   path: "table",
-    //   children: [
-    //     {
-    //       name: "element表格",
-    //       path: "element-plus",
-    //       children: []
-    //     },
-    //     {
-    //       name: "vxe-table",
-    //       path: "vxe-table",
-    //       children: []
-    //     },
-    //     {
-    //       name: "vxe-table2",
-    //       path: "vxe-table2",
-    //       children: []
-    //     }
-    //   ]
-    // },
+    {
+      name: "表格",
+      path: "table",
+      children: [
+        {
+          name: "element表格",
+          path: "element-plus",
+          children: []
+        },
+        {
+          name: "vxe-table",
+          path: "vxe-table",
+          children: []
+        },
+        {
+          name: "vxe-table2",
+          path: "vxe-table2",
+          children: []
+        }
+      ]
+    },
     {
       name: "首页",
       path: "dashboard",
@@ -46,51 +46,49 @@ const getMenu = async () => {
         {
           name: "shouye", //后端不返回或者返回“”则用前端配置的路由
           path: "dashboard-index"
-        },
+        }
+        // {
+        //   name: "unocss-index",
+        //   path: "unocss-index"
+        // }
+      ]
+    },
+    {
+      name: "unocss",
+      path: "unocss",
+      children: [
         {
           name: "unocss-index",
           path: "unocss-index"
         }
       ]
+    },
+
+    {
+      name: "外链",
+      path: "link",
+      children: [
+        {
+          name: "中文文档", //后端不返回或者返回“”则用前端配置的路由
+          path: "https://juejin.cn/post/7089377403717287972"
+        },
+        {
+          name: "新手教程1", //后端不返回或者返回“”则用前端配置的路由
+          path: "https://juejin.cn/column/7207659644487139387"
+        }
+      ]
     }
-    // {
-    //   name: "unocss",
-    //   path: "unocss",
-    //   children: [
-    //     {
-    //       name: "unocss-index",
-    //       path: "unocss-index"
-    //     }
-    //   ]
-    // },
-    //
-    // {
-    //   name: "外链",
-    //   path: "link",
-    //   children: [
-    //     {
-    //       name: "中文文档", //后端不返回或者返回“”则用前端配置的路由
-    //       path: "https://juejin.cn/post/7089377403717287972"
-    //     },
-    //     {
-    //       name: "新手教程1", //后端不返回或者返回“”则用前端配置的路由
-    //       path: "https://juejin.cn/column/7207659644487139387"
-    //     }
-    //   ]
-    // }
   ]
 
-  function flattenWithPaths(items) {
-    let result = []
+  function flattenWithPaths(items: BaseRouteConfig[] = []) {
+    let result = [] as BaseRouteConfig[]
 
     items.forEach((item) => {
       // 创建当前项目的路径，基于父路径和当前索引或名称
-      // const currentPath = [...parentPath, ...(item.path ? [item.path] : [index])]
       const currentPath = [item.path]
 
       // 删除children属性以避免重复处理，同时保留其他所有属性
       const currentItemWithoutChildren = { ...item }
-      // delete currentItemWithoutChildren.children
 
       // 添加路径信息到当前项目
       currentItemWithoutChildren.path = currentPath.join("/")
@@ -99,16 +97,16 @@ const getMenu = async () => {
 
       // 如果有children，递归处理并合并结果
       if (item.children && item.children.length > 0) {
-        result = result.concat(flattenWithPaths(item.children, currentPath))
+        result = result.concat(flattenWithPaths(item.children))
       }
     })
 
     return result
   }
 
-  function buildRoutes(menu: any, localRoutes: any): any[] {
+  function buildRoutes(menu: BaseRouteConfig[], localRoutes: BaseRouteConfig[]) {
     return menu.map((item: any) => {
-      let route = null // 初始化route变量
+      let route: BaseRouteConfig | null = null // 初始化route变量
       localRoutes?.forEach((localRoute: any) => {
         // 使用some代替forEach以便提前终止循环
         if (localRoute.path === item.path) {
@@ -125,7 +123,7 @@ const getMenu = async () => {
               // affix: localRoute.meta.affix,
               // title: item.name || localRoute.meta.title // 假设没有专门的title字段，则使用name作为标题
             }
-          }
+          } as BaseRouteConfig
           if (localRoute.children) {
             route.children = buildRoutes(item.children, flattenWithPaths(routes)) // 修正这里，确保子路由被正确赋值
           }
@@ -142,15 +140,16 @@ const getMenu = async () => {
         }
         if (item.children && item.children.length > 0) {
           route.redirect = `${item.path}/${item.children[0].path}` // 设置重定向到第一个子路由
-          route.children = buildRoutes(item.children) // 递归构建子路由
+          route.children = buildRoutes(item.children, flattenWithPaths(routes)) // 递归构建子路由
         }
       }
 
-      return route
+      return route as BaseRouteConfig
     })
   }
 
-  const routess = buildRoutes(dongtaiMenu, flattenWithPaths(routes))
+  // todo:这里的any需要后端接口也定义下来之后再改
+  const routess = buildRoutes(dongtaiMenu as any[], flattenWithPaths(routes))
 
   routess.map((item) => {
     item.path = "/" + item.path
@@ -184,15 +183,17 @@ const staticRoutes = [
   }
 ]
 const dynamicRoutesFromInterface = await getMenu()
+console.log(185, dynamicRoutesFromInterface)
 // console.log(155, dynamicRoutesFromInterface[0])
 const getRoutes = () => {
   const firstRedirectRoute = {
     path: "/",
     component: Layouts,
     meta: dynamicRoutesFromInterface[0].meta,
-    redirect: dynamicRoutesFromInterface[0].children[0].path,
-    children: dynamicRoutesFromInterface[0].children
-  }
+    redirect: dynamicRoutesFromInterface[0].children?.[0]?.path,
+    children: dynamicRoutesFromInterface[0].children,
+    name: dynamicRoutesFromInterface[0]?.name
+  } as unknown as BaseRouteConfig
   dynamicRoutesFromInterface[0] = firstRedirectRoute
   return [...staticRoutes, ...dynamicRoutesFromInterface]
 }
@@ -485,7 +486,9 @@ export const dynamicRoutes: RouteRecordRaw[] = [
 
 const router = createRouter({
   history,
-  routes: routeSettings.thirdLevelRouteCache ? flatMultiLevelRoutes(constantRoutes) : constantRoutes
+  routes: routeSettings.thirdLevelRouteCache
+    ? flatMultiLevelRoutes(constantRoutes as RouteRecordRaw[])
+    : (constantRoutes as RouteRecordRaw[])
 })
 
 /** 重置路由 */
