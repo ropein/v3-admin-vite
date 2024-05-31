@@ -1,4 +1,4 @@
-import { type RouteRecordRaw, createRouter, BaseRouteConfig, RouteWithDefault } from "vue-router"
+import { createRouter, RouteRecordRaw, RouteWithDefault } from "vue-router"
 import { history, flatMultiLevelRoutes } from "./helper"
 import routeSettings from "@/config/route"
 // import { menuApi } from "@/api/menu"
@@ -10,7 +10,7 @@ const getMenu = async () => {
   // const res = await menuApi({})
   // menuApi({}).then((res) => {
   const routeFiles = import.meta.glob("../router/main/**/*.ts", { eager: true }) as Record<string, RouteWithDefault>
-  const routes: BaseRouteConfig[] = []
+  const routes: RouteRecordRaw[] = []
   for (const path in routeFiles) {
     if (Object.prototype.hasOwnProperty.call(routeFiles, path)) {
       const routeConfig = routeFiles[path].default // 或者根据实际情况调整导出名
@@ -80,8 +80,8 @@ const getMenu = async () => {
     }
   ]
 
-  function flattenWithPaths(items: BaseRouteConfig[] = []) {
-    let result = [] as BaseRouteConfig[]
+  function flattenWithPaths(items: RouteRecordRaw[] = []) {
+    let result = [] as RouteRecordRaw[]
 
     items.forEach((item) => {
       // 创建当前项目的路径，基于父路径和当前索引或名称
@@ -104,9 +104,9 @@ const getMenu = async () => {
     return result
   }
 
-  function buildRoutes(menu: BaseRouteConfig[], localRoutes: BaseRouteConfig[]) {
+  function buildRoutes(menu: RouteRecordRaw[], localRoutes: RouteRecordRaw[]) {
     return menu.map((item: any) => {
-      let route: BaseRouteConfig | null = null // 初始化route变量
+      let route: RouteRecordRaw | null = null // 初始化route变量
       localRoutes?.forEach((localRoute: any) => {
         // 使用some代替forEach以便提前终止循环
         if (localRoute.path === item.path) {
@@ -123,7 +123,7 @@ const getMenu = async () => {
               // affix: localRoute.meta.affix,
               // title: item.name || localRoute.meta.title // 假设没有专门的title字段，则使用name作为标题
             }
-          } as BaseRouteConfig
+          } as RouteRecordRaw
           if (localRoute.children) {
             route.children = buildRoutes(item.children, flattenWithPaths(routes)) // 修正这里，确保子路由被正确赋值
           }
@@ -137,14 +137,14 @@ const getMenu = async () => {
           path: item.path,
           name: item.name,
           meta: item.meta
-        }
+        } as RouteRecordRaw
         if (item.children && item.children.length > 0) {
           route.redirect = `${item.path}/${item.children[0].path}` // 设置重定向到第一个子路由
           route.children = buildRoutes(item.children, flattenWithPaths(routes)) // 递归构建子路由
         }
       }
 
-      return route as BaseRouteConfig
+      return route as RouteRecordRaw
     })
   }
 
@@ -182,9 +182,10 @@ const staticRoutes = [
     }
   }
 ]
-const dynamicRoutesFromInterface = await getMenu()
+
 // console.log(155, dynamicRoutesFromInterface[0])
-const getRoutes = () => {
+const getRoutes = async () => {
+  const dynamicRoutesFromInterface = await getMenu()
   const firstRedirectRoute = {
     path: "/",
     component: Layouts,
@@ -192,11 +193,11 @@ const getRoutes = () => {
     redirect: dynamicRoutesFromInterface[0].children?.[0]?.path,
     children: dynamicRoutesFromInterface[0].children,
     name: dynamicRoutesFromInterface[0]?.name
-  } as unknown as BaseRouteConfig
+  } as unknown as RouteRecordRaw
   dynamicRoutesFromInterface[0] = firstRedirectRoute
   return [...staticRoutes, ...dynamicRoutesFromInterface]
 }
-export const constantRoutes = getRoutes()
+export const constantRoutes = await getRoutes()
 // export const constantRoutes = getRoutes()
 /**
  * 常驻路由

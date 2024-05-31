@@ -32,7 +32,9 @@
     /** 非相对模块导入的路径映射配置，根据 baseUrl 配置进行路径计算 */
     "paths": {
       "@/*": ["src/*"]
-    }
+    },
+//    noEmitOnError: 设置为false可以让编译器即使遇到错误也继续生成输出文件。默认情况下，当有错误时TypeScript会阻止输出文件的生成。
+//    "noEmitOnError": false
   },
   "include": [
     "src/**/*.ts",

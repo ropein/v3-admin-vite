@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import DialogFooter from "@/components/Dialog/footer.vue"
-import { defineProps, defineEmits, ref } from "vue"
+import { ref } from "vue"
 const props = defineProps({
   from: {
     type: String,
@@ -31,7 +31,7 @@ const close = () => {
   console.log(15)
   emit("closeDialog")
 }
-const handleConfirm = (callback) => {
+const handleConfirm = (callback: any) => {
   console.log(35, callback)
   setTimeout(() => {
     console.log("模拟接口返回")

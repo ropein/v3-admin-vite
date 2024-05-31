@@ -1,4 +1,5 @@
 import "vue-router"
+import { RouteRecordRaw } from "vue-router"
 
 declare module "vue-router" {
   interface RouteMeta {
@@ -50,18 +51,8 @@ declare module "vue-router" {
     keepAlive?: boolean
   }
 
-  type VueComponentType = typeof import("vue")
-
-  interface BaseRouteConfig {
-    children?: BaseRouteConfig[]
-    path: string
-    name?: string
-    redirect?: string
-    component?: () => Promise<VueComponentType>
-    meta: RouteMeta
-  }
   // 定义一个带有'default'属性的完整路由配置类型
-  interface RouteWithDefault extends BaseRouteConfig {
-    default: BaseRouteConfig // 或者你可以移除此行，如果'default'关键字不携带额外信息
+  interface RouteWithDefault extends RouteRecordRaw {
+    default: RouteRecordRaw // 或者你可以移除此行，如果'default'关键字不携带额外信息
   }
 }

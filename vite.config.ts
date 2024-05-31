@@ -74,7 +74,8 @@ export default ({ mode }: ConfigEnv): UserConfigExport => {
             vxe: ["vxe-table", "vxe-table-plugin-element", "xe-utils"]
           }
         }
-      }
+      },
+      target: ["edge90", "chrome90", "firefox90", "safari15"],
     },
     /** 混淆器 */
     esbuild:

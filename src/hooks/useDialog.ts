@@ -1,10 +1,11 @@
-import { getCurrentInstance, Ref, unref } from "vue"
+import { getCurrentInstance, Ref, unref, VNode } from "vue"
 import { h, isRef, onUnmounted, render } from "vue"
 import { ElDialog } from "element-plus"
 import type { ComponentInternalInstance } from "vue"
 import { merge, upperFirst } from "lodash-es"
 
-type Content = Parameters<typeof h>[0] | string | JSX.Element
+// type Content = Parameters<typeof h>[0] | string | JSX.Element
+type Content = Parameters<typeof h>[0] | string | VNode
 // 使用 InstanceType 获取 ElDialog 组件实例的类型
 type ElDialogInstance = InstanceType<typeof ElDialog>
 
@@ -110,11 +111,11 @@ export function useDialog<P = any>(
                 beforeCloseDialog: (fn: () => boolean | void) => {
                   // 把`beforeCloseDialog`传递给`content`，当组件内部使用`props.beforeCloseDialog(fn)`时，会把fn传递给`onBeforeClose`
                   onBeforeClose = fn
-                  dialogProps?.beforeClose?.()
+                  dialogProps?.beforeClose?.(fn)
                 }
               })
         ],
-        ...options.dialogSlots
+        ...(options as any)?.dialogSlots
       }
     )
     // 设置当前的上下文为使用者的上下文
